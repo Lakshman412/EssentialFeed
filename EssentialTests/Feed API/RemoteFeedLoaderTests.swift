@@ -38,7 +38,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 	func test_load_deliversErrorOnClientErrors() {
 		let (sut, client) = makeSUT()
 
-		expect(sut, toCompleteWith: .failure(RemoteFeedLoader.Error.connectivity), when: {
+		expect(sut, toCompleteWith: failure(.connectivity), when: {
 			let clientError = NSError(domain: "Test", code: 0)
 			client.complete(with: clientError)
 		})
@@ -50,7 +50,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 		let samples = [199, 201, 300, 400, 500]
 
 		samples.enumerated().forEach { index, code in
-			expect(sut, toCompleteWith: .failure(RemoteFeedLoader.Error.invalidData), when: {
+			expect(sut, toCompleteWith: failure(.invalidData), when: {
 				let json = makeItemsJSON([])
 				client.complete(with: code, data: json, at: index)
 			})
@@ -60,7 +60,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 	func test_load_deliversError200HTTPResponseWithInvalidJSON() {
 		let (sut, client) = makeSUT()
 
-		expect(sut, toCompleteWith: .failure(RemoteFeedLoader.Error.invalidData), when: {
+		expect(sut, toCompleteWith: failure(.invalidData), when: {
 			let data = Data("invalid json".utf8)
 			client.complete(with: 200, data: data)
 		})
@@ -111,6 +111,10 @@ class RemoteFeedLoaderTests: XCTestCase {
 	}
 
 	// MARK: - Helpers
+
+	private func failure(_ error: RemoteFeedLoader.Error) -> RemoteFeedLoader.Result {
+		return .failure(error)
+	}
 
 	private func makeSUT(url: URL = URL(string: "https://a-url.com")!, file: StaticString = #file, line: UInt = #line) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
 		let client = HTTPClientSpy()
