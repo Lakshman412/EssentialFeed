@@ -28,17 +28,22 @@ class LocalFeedLoader {
 
 class FeedStore {
 	typealias DeletionCompletion = (Error?) -> Void
-	var deleteCAchedFeedCallCount = 0
-	var insertions = [(items: [FeedItem], timeStamp: Date)]()
 	var deleteCallBack = [DeletionCompletion]()
 
+	enum ReceivedMessage: Equatable {
+		case deleteCacheFeed
+		case insert([FeedItem], Date)
+	}
+
+	private(set) var receivedMessages = [ReceivedMessage]()
+
 	func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		self.deleteCAchedFeedCallCount += 1
 		deleteCallBack.append(completion)
+		self.receivedMessages.append(.deleteCacheFeed)
 	}
 
 	func insertFeed(_ items: [FeedItem], timeStamp: Date) {
-		self.insertions.append((items, timeStamp))
+		self.receivedMessages.append(.insert(items, timeStamp))
 	}
 
 	func completeDeletion(with error: NSError, at index: Int = 0) {
@@ -55,14 +60,14 @@ class CacheFeedUseCaseTests: XCTestCase {
 	func test_init_doesNotDeleteCacheUponCreation() {
 		let (_, store) = makeSUT()
 
-		XCTAssertEqual(store.deleteCAchedFeedCallCount, 0)
+		XCTAssertEqual(store.receivedMessages, [])
 	}
 
 	func test_save_requestsCacheDeletion() {
 		let (sut, store) = makeSUT()
 		let items = [uniqueItems()]
 		sut.save(items)
-		XCTAssertEqual(store.deleteCAchedFeedCallCount, 1)
+		XCTAssertEqual(store.receivedMessages, [.deleteCacheFeed])
 	}
 
 	func test_save_doesNotRequestCacheInsertionOnDeletionError() {
@@ -73,7 +78,7 @@ class CacheFeedUseCaseTests: XCTestCase {
 		sut.save(items)
 		store.completeDeletion(with: deleteCacheError)
 
-		XCTAssertEqual(store.deleteCAchedFeedCallCount, 1)
+		XCTAssertEqual(store.receivedMessages, [.deleteCacheFeed])
 	}
 
 	func test_save_requestsNewCacheInsertionWithTimeStampOnSuccessfulDeletion() {
@@ -84,9 +89,7 @@ class CacheFeedUseCaseTests: XCTestCase {
 		sut.save(items)
 		store.completeDeletionSuccessfully()
 
-		XCTAssertEqual(store.insertions.count, 1)
-		XCTAssertEqual(store.insertions.first?.items, items)
-		XCTAssertEqual(store.insertions.first?.timeStamp, timeStamp)
+		XCTAssertEqual(store.receivedMessages, [.deleteCacheFeed, .insert(items, timeStamp)])
 	}
 
 	// MARK: - Helpers
