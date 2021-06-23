@@ -10,10 +10,12 @@ import Essential
 internal class FeedStoreSpy: FeedStore {
 	var deleteCallBack = [DeletionCompletion]()
 	var insertionCompletion = [InsertionCompletion]()
+	var retrievalCompletion = [RetrievalCompletion]()
 
 	enum ReceivedMessage: Equatable {
 		case deleteCacheFeed
 		case insert([LocalFeedImage], Date)
+		case retrieve
 	}
 
 	private(set) var receivedMessages = [ReceivedMessage]()
@@ -26,6 +28,11 @@ internal class FeedStoreSpy: FeedStore {
 	func insertFeed(_ feed: [LocalFeedImage], timeStamp: Date, completion: @escaping InsertionCompletion) {
 		self.insertionCompletion.append(completion)
 		self.receivedMessages.append(.insert(feed, timeStamp))
+	}
+
+	func retrieve(completion: @escaping RetrievalCompletion) {
+		self.retrievalCompletion.append(completion)
+		self.receivedMessages.append(.retrieve)
 	}
 
 	func completeDeletion(with error: NSError, at index: Int = 0) {
@@ -42,5 +49,13 @@ internal class FeedStoreSpy: FeedStore {
 
 	func completeInsertionSuccessfully(at index: Int = 0) {
 		insertionCompletion[index](nil)
+	}
+
+	func completeRetrieval(with error: NSError, at index: Int = 0) {
+		retrievalCompletion[index](error)
+	}
+
+	func completeRetrievalSuccessfully(at index: Int = 0) {
+		retrievalCompletion[index](nil)
 	}
 }
