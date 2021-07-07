@@ -9,7 +9,7 @@ import Foundation
 
 internal final class FeedCachePolicy {
 	private init() {}
-	
+
 	private static let calendar = Calendar(identifier: .gregorian)
 
 	private static var maxCacheAgeInDays: Int {
