@@ -47,9 +47,13 @@ class CodableFeedStore {
 			completion(.empty)
 			return
 		}
-		let decoder = JSONDecoder()
-		let cache = try! decoder.decode(Cache.self, from: data)
-		completion(.found(feed: cache.localFeed, timeStamp: cache.timestamp))
+		do {
+			let decoder = JSONDecoder()
+			let cache = try decoder.decode(Cache.self, from: data)
+			completion(.found(feed: cache.localFeed, timeStamp: cache.timestamp))
+		} catch {
+			completion(.failure(error))
+		}
 	}
 
 	func insertFeed(_ feed: [LocalFeedImage], timeStamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
@@ -106,10 +110,19 @@ class CodableFeedStoreTests: XCTestCase {
 		expect(sut, toRetrieveTwice: .found(feed: feed, timeStamp: timestamp))
 	}
 
+	func test_retrieve_deliversFailureOnRetrievalError() {
+		let storeURL = testSpecificStoreURL()
+		let sut = makeSUT(storeURL: storeURL)
+
+		try! "invalid data".write(to: storeURL, atomically: false, encoding: .utf8)
+
+		expect(sut, toRetrieve: .failure(anyNSError()))
+	}
+
 	// MARK: - Helpers
 
-	private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
-		let sut = CodableFeedStore(storeURL: self.testSpecificStoreURL())
+	private func makeSUT(storeURL: URL? = nil,file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
+		let sut = CodableFeedStore(storeURL: storeURL ?? self.testSpecificStoreURL())
 		trackForMemoryLeaks(sut, file: file, line: line)
 		return sut
 	}
@@ -133,7 +146,8 @@ class CodableFeedStoreTests: XCTestCase {
 
 		sut.retrieve() { receivedResult in
 			switch (expectedResult, receivedResult) {
-			case (.empty, .empty):
+			case (.empty, .empty),
+				 (.failure, .failure):
 				break
 
 			case let (.found(expectedFeed, expectedTimeStamp), .found(receivedFeed, receivedTimeStamp)):
