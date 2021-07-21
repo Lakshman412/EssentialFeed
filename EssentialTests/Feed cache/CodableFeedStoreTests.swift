@@ -168,7 +168,7 @@ class CodableFeedStoreTests: XCTestCase {
 			deletionError = error
 			exp.fulfill()
 		}
-		wait(for: [exp], timeout: 1.0)
+		wait(for: [exp], timeout: 10.0) // Reduce the time to 1.0 seconds
 		return deletionError
 	}
 
