@@ -96,7 +96,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStore {
 	func test_insert_HasNoSideEffectsOnInsertionError() {
 		let invalidStoreURL = URL(string: "invalid://store-url")!
 		let sut = makeSUT(storeURL: invalidStoreURL)
-		
+
 		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
 	}
 
@@ -131,18 +131,14 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStore {
 		let noDeletePermissionURL = cachesDirectory()
 		let sut = makeSUT(storeURL: noDeletePermissionURL)
 
-		let deletionError = deleteCache(from: sut)
-
-		XCTAssertNotNil(deletionError, "Expected deletion to complete with error")
+		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
 		let noDeletePermissionURL = cachesDirectory()
 		let sut = makeSUT(storeURL: noDeletePermissionURL)
 
-		deleteCache(from: sut)
-
-		expect(sut, toRetrieve: .empty)
+		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
 	}
 
 	func test_storeSideEffects_runSerially() {
