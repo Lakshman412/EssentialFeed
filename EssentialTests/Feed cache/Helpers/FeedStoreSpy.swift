@@ -7,7 +7,7 @@
 
 import Essential
 
-internal class FeedStoreSpy: FeedStore {
+class FeedStoreSpy: FeedStore {
 	var deleteCallBack = [DeletionCompletion]()
 	var insertionCompletion = [InsertionCompletion]()
 	var retrievalCompletion = [RetrievalCompletion]()
