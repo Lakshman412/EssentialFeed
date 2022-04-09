@@ -47,7 +47,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStore {
 
 		insert((feed, timestamp), to: sut)
 
-		expect(sut, toRetrieveTwice: .found(feed: feed, timeStamp: timestamp))
+		expect(sut, toRetrieveTwice: .success(.found(feed: feed, timeStamp: timestamp)))
 	}
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
