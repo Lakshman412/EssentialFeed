@@ -36,19 +36,19 @@ class FeedStoreSpy: FeedStore {
 	}
 
 	func completeDeletion(with error: NSError, at index: Int = 0) {
-		deleteCallBack[index](error)
+		deleteCallBack[index](.failure(error))
 	}
 
 	func completeDeletionSuccessfully(at index: Int = 0) {
-		deleteCallBack[index](nil)
+		deleteCallBack[index](.success(()))
 	}
 
 	func completeInsertion(with error: NSError, at index: Int = 0) {
-		insertionCompletion[index](error)
+		insertionCompletion[index](.failure(error))
 	}
 
 	func completeInsertionSuccessfully(at index: Int = 0) {
-		insertionCompletion[index](nil)
+		insertionCompletion[index](.success(()))
 	}
 
 	func completeRetrieval(with error: NSError, at index: Int = 0) {
