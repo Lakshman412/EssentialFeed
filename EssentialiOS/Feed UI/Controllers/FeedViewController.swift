@@ -5,7 +5,6 @@
 //  Created by lakshman-7016 on 08/08/22.
 //
 
-import Essential
 import UIKit
 
 final public class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching {
@@ -26,7 +25,6 @@ final public class FeedViewController: UITableViewController, UITableViewDataSou
         self.refreshControl = refeshController?.view
         tableView.prefetchDataSource = self
         self.refeshController?.refresh()
-        
     }
     
     public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
